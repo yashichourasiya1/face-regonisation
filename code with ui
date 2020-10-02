@@ -1,0 +1,47 @@
+from tensorflow.keras.preprocessing.image import ImageDataGenerator,load_img,img_to_array
+from tensorflow.keras import layers
+from tensorflow.keras import models
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow import keras
+import tkinter as tk
+from tkinter import Message ,Text
+import cv2,os
+import shutil
+import csv
+import numpy as np
+from PIL import Image, ImageTk
+import pandas as pd
+import datetime
+import time
+x=ImageDataGenerator(rescale=1/255.0)
+x_train=x.flow_from_directory(r"Train/",target_size=(150,150),batch_size=20,class_mode="binary")
+x_valid=x.flow_from_directory(r"Validation/",target_size=(150,150),batch_size=20,class_mode="binary")
+model=models.Sequential()
+model.add(layers.Conv2D(32,(3,3),activation='relu',input_shape=(150,150,3)))
+model.add(layers.MaxPooling2D((2,2)))
+model.add(layers.Conv2D(64,(3,3),activation='relu'))
+model.add(layers.MaxPooling2D((2,2)))
+model.add(layers.Conv2D(128,(3,3),activation='relu'))
+model.add(layers.MaxPooling2D((2,2)))
+model.add(layers.Conv2D(128,(3,3),activation='relu'))
+model.add(layers.MaxPooling2D((2,2)))
+model.add(layers.Flatten())
+model.add(layers.Dense(512,activation='relu'))
+model.add(layers.Dense(1,activation='sigmoid'))
+model.compile(loss='binary_crossentropy',optimizer=tf.keras.optimizers.RMSprop(lr=1e-4),metrices=['acc'])
+# call=keras.callbacks.ModelCheckpoint("TrainingImageLabel\Trainner.h5",save_best_only=True)
+# early=keras.callbacks.EarlyStopping(patience=8,restore_best_weights=True)
+model_fit=model.fit_generator(x_train,steps_per_epoch=12,epochs=20,validation_data =x_valid,validation_steps=11)#,callbacks=[call,early]
+model.save('FullTrain.h5')
+# res = "Image Trained"#+",".join(str(f) for f in Id)
+# message.configure(text= res)
+x=ImageDataGenerator(rescale=1/255.0)
+y=x.flow_from_directory('Test/',target_size=(220,220),class_mode='binary',batch_size=1)
+model = models.load_model('FullTrain.h5')
+print("=====1")
+
+
+y_pred=model.predict_generator(y,verbose=1)
+print("=========2")
+print(y_pred)
